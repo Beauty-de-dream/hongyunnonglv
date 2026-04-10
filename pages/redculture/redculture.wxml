@@ -1,0 +1,186 @@
+<!--pages/redculture/redculture.wxml - 红色传承页面-->
+<view class="page-red {{elderMode ? 'elder-mode' : ''}}">
+
+  <!-- 朗读按钮（悬浮） -->
+  <view class="read-aloud-btn" bindtap="onReadAloud" wx:if="{{elderMode}}">
+    <text class="read-icon">🔊</text>
+    <text class="read-label">朗读</text>
+  </view>
+
+  <!-- 顶部横幅 -->
+  <view class="hero-banner">
+    <view class="hero-overlay">
+      <view class="hero-content">
+        <text class="hero-badge">🎖️ 红色传承</text>
+        <text class="hero-title">不忘初心 · 牢记使命</text>
+        <text class="hero-subtitle">传承红色基因，弘扬革命精神</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快速导航 -->
+  <view class="quick-nav">
+    <view class="nav-item" bindtap="scrollToSection" data-id="stories">
+      <view class="nav-icon nav-icon-red">📖</view>
+      <text class="nav-text">红色故事</text>
+    </view>
+    <view class="nav-item" bindtap="scrollToSection" data-id="sites">
+      <view class="nav-icon nav-icon-orange">🏛️</view>
+      <text class="nav-text">遗址打卡</text>
+    </view>
+    <view class="nav-item" bindtap="scrollToSection" data-id="guides">
+      <view class="nav-icon nav-icon-gold">🎙️</view>
+      <text class="nav-text">讲解预约</text>
+    </view>
+    <view class="nav-item" bindtap="scrollToSection" data-id="comments">
+      <view class="nav-icon nav-icon-warm">💬</view>
+      <text class="nav-text">心得留言</text>
+    </view>
+  </view>
+
+  <!-- 红色故事/党史文章 -->
+  <view class="section" id="stories">
+    <view class="section-header">
+      <view class="section-title-wrap">
+        <view class="title-bar title-bar-red"></view>
+        <text class="section-title">红色故事 · 党史文章</text>
+      </view>
+      <text class="section-subtitle">铭记历史，传承精神</text>
+    </view>
+    <view class="article-list">
+      <view class="article-card" wx:for="{{articles}}" wx:key="id" bindtap="goToArticle" data-id="{{item.id}}">
+        <image class="article-image" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="article-info">
+          <view class="article-header">
+            <text class="article-category">{{item.category}}</text>
+            <text class="article-date">{{item.date}}</text>
+          </view>
+          <text class="article-title">{{item.title}}</text>
+          <text class="article-summary">{{item.summary}}</text>
+          <view class="article-footer">
+            <text class="article-reads">👁 {{item.readCount}}次阅读</text>
+            <text class="article-more">阅读全文 ></text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 红色遗址/展馆打卡 -->
+  <view class="section section-gray" id="sites">
+    <view class="section-header">
+      <view class="section-title-wrap">
+        <view class="title-bar title-bar-red"></view>
+        <text class="section-title">红色遗址 · 展馆打卡</text>
+      </view>
+      <text class="section-subtitle">探访革命圣地，传承红色文化</text>
+    </view>
+    <view class="site-list">
+      <view class="site-card" wx:for="{{sites}}" wx:key="id" bindtap="goToSite" data-index="{{index}}">
+        <image class="site-image" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="site-loc-badge">
+          <text>📍 {{item.location}}</text>
+        </view>
+        <view class="site-info">
+          <text class="site-name">{{item.name}}</text>
+          <text class="site-desc">{{item.description}}</text>
+          <view class="site-meta">
+            <text class="site-time">🕐 {{item.openTime}}</text>
+            <text class="site-price-badge">{{item.price}}</text>
+          </view>
+          <view class="site-footer">
+            <text class="site-checked">✅ {{item.checked}}人已打卡</text>
+            <view class="checkin-btn" catchtap="checkIn" data-id="{{item.id}}">
+              <text>🚩 我要打卡</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 红色讲解员预约 -->
+  <view class="section" id="guides">
+    <view class="section-header">
+      <view class="section-title-wrap">
+        <view class="title-bar title-bar-red"></view>
+        <text class="section-title">红色讲解员预约</text>
+      </view>
+      <text class="section-subtitle">专业讲解，让历史鲜活起来</text>
+    </view>
+    <view class="guide-list">
+      <view class="guide-card" wx:for="{{redGuides}}" wx:key="id">
+        <view class="guide-avatar-wrap">
+          <image class="guide-avatar" src="{{item.avatar}}" mode="aspectFill"></image>
+          <view class="guide-avail-badge {{item.available ? 'badge-avail' : 'badge-busy'}}">
+            {{item.available ? '可预约' : '忙碌中'}}
+          </view>
+        </view>
+        <view class="guide-info">
+          <view class="guide-name-row">
+            <text class="guide-name">{{item.name}}</text>
+            <text class="guide-exp">{{item.experience}}年经验</text>
+          </view>
+          <text class="guide-specialty">🎙️ {{item.specialty}}</text>
+          <text class="guide-intro">{{item.intro}}</text>
+          <view class="guide-bottom">
+            <view class="guide-rating-wrap">
+              <text class="star-sm">⭐</text>
+              <text class="rating-val">{{item.rating}}</text>
+              <text class="rating-cnt">({{item.ratingCount}}评)</text>
+            </view>
+            <text class="guide-price">{{item.price}}</text>
+          </view>
+        </view>
+        <view class="guide-book-btn {{item.available ? '' : 'btn-disabled'}}" catchtap="bookGuide" data-index="{{index}}">
+          <text>{{item.available ? '预约' : '已满'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 留言/心得墙 -->
+  <view class="section section-gray" id="comments">
+    <view class="section-header">
+      <view class="section-title-wrap">
+        <view class="title-bar title-bar-red"></view>
+        <text class="section-title">留言 · 心得墙</text>
+      </view>
+      <text class="section-subtitle">记录您的感悟，传递红色力量</text>
+    </view>
+
+    <!-- 发布按钮 -->
+    <view class="publish-comment-btn" bindtap="showCommentInput">
+      <text>✍️ 写下我的感悟</text>
+    </view>
+
+    <!-- 输入框 -->
+    <view class="comment-input-wrap" wx:if="{{showCommentInput}}">
+      <textarea class="comment-textarea" placeholder="分享您参观或学习后的感受和心得..." bindinput="onCommentInput" value="{{commentText}}" maxlength="200"></textarea>
+      <view class="comment-actions">
+        <text class="comment-cancel" bindtap="cancelComment">取消</text>
+        <view class="comment-submit" bindtap="submitComment">发布</view>
+      </view>
+    </view>
+
+    <!-- 评论列表 -->
+    <view class="comment-list">
+      <view class="comment-item" wx:for="{{comments}}" wx:key="id">
+        <view class="comment-avatar">
+          <text class="avatar-letter">{{item.author[0]}}</text>
+        </view>
+        <view class="comment-content">
+          <view class="comment-header">
+            <text class="comment-author">{{item.author}}</text>
+            <text class="comment-date">{{item.date}}</text>
+          </view>
+          <text class="comment-text">{{item.content}}</text>
+          <view class="comment-like" catchtap="likeComment" data-id="{{item.id}}">
+            <text>👍 {{item.likes}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+</view>

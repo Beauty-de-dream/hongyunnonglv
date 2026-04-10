@@ -1,0 +1,102 @@
+<!--pages/guide/guide.wxml - 乡村向导预约-->
+<view class="page-guide {{elderMode ? 'elder-mode' : ''}}">
+
+  <!-- 页面头部 -->
+  <view class="page-header">
+    <text class="page-header-title">🧭 乡村向导预约</text>
+    <text class="page-header-desc">本地专业向导，带您深度游览苗寨与农家</text>
+  </view>
+
+  <!-- 特色介绍 -->
+  <view class="features-section hide-in-elder">
+    <view class="feature-row">
+      <view class="feature-item">
+        <text class="fi-icon">🗺️</text>
+        <view>
+          <text class="fi-title">深度路线</text>
+          <text class="fi-desc">走进未开发的苗寨秘境</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <text class="fi-icon">🌿</text>
+        <view>
+          <text class="fi-title">本地向导</text>
+          <text class="fi-desc">土生土长，讲解真实生动</text>
+        </view>
+      </view>
+    </view>
+    <view class="feature-row">
+      <view class="feature-item">
+        <text class="fi-icon">🍽️</text>
+        <view>
+          <text class="fi-title">农家体验</text>
+          <text class="fi-desc">品地道美食，感受农耕文化</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <text class="fi-icon">⭐</text>
+        <view>
+          <text class="fi-title">信用保障</text>
+          <text class="fi-desc">平台认证，好评率95%以上</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 向导列表 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">精选向导</text>
+      <text class="section-sub">共 {{guides.length}} 位专业向导</text>
+    </view>
+    <view class="guide-list">
+      <view class="guide-card" wx:for="{{guides}}" wx:key="id">
+        <image class="guide-avatar" src="{{item.avatar}}" mode="aspectFill"></image>
+        <view class="guide-info">
+          <view class="guide-top-row">
+            <text class="guide-name">{{item.name}}</text>
+            <view class="guide-avail {{item.available ? 'avail-yes' : 'avail-no'}}">
+              {{item.available ? '可预约' : '已约满'}}
+            </view>
+          </view>
+          <text class="guide-specialty">🧭 {{item.specialty}}</text>
+          <text class="guide-intro-text">{{item.intro}}</text>
+          <view class="guide-tag-row">
+            <text class="gtag" wx:for="{{item.tags}}" wx:key="*this" wx:for-item="gtag">{{gtag}}</text>
+          </view>
+          <view class="guide-meta-row">
+            <text class="guide-meta">⭐ {{item.rating}} ({{item.ratingCount}}评) · {{item.experience}}年经验</text>
+          </view>
+          <view class="guide-price-row">
+            <text class="guide-price">{{item.price}}</text>
+            <view class="book-btn {{item.available ? '' : 'btn-disabled'}}" catchtap="bookGuide" data-index="{{index}}">
+              <text>{{item.available ? '📅 立即预约' : '❌ 已约满'}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 预约说明 -->
+  <view class="tips-section">
+    <text class="tips-title">📝 预约须知</text>
+    <view class="tip-row">
+      <text class="tip-num">01</text>
+      <text class="tip-text">预约成功后，向导将在24小时内与您联系确认行程</text>
+    </view>
+    <view class="tip-row">
+      <text class="tip-num">02</text>
+      <text class="tip-text">每次导览为半天或全天行程，可根据需求定制路线</text>
+    </view>
+    <view class="tip-row">
+      <text class="tip-num">03</text>
+      <text class="tip-text">建议提前2-3天预约，旅游旺季建议提前1周预约</text>
+    </view>
+    <view class="tip-row">
+      <text class="tip-num">04</text>
+      <text class="tip-text">如需取消，请至少提前24小时联系向导，避免违约</text>
+    </view>
+  </view>
+
+</view>

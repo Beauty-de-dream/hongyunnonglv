@@ -1,0 +1,159 @@
+<!--pages/tourism/tourism.wxml - 乡村旅游页面-->
+<view class="page-tourism {{elderMode ? 'elder-mode' : ''}}">
+
+  <!-- 朗读按钮（悬浮） -->
+  <view class="read-aloud-btn" bindtap="onReadAloud" wx:if="{{elderMode}}">
+    <text class="read-icon">🔊</text>
+    <text class="read-label">朗读</text>
+  </view>
+
+  <!-- 顶部横幅 -->
+  <view class="hero-banner">
+    <view class="hero-content">
+      <text class="hero-badge">🌄 乡村旅游</text>
+      <text class="hero-title">探索苗乡秘境</text>
+      <text class="hero-subtitle">农事体验 · 向导带路 · 特产购物</text>
+    </view>
+  </view>
+
+  <!-- 快速导航 -->
+  <view class="quick-nav">
+    <view class="nav-item" bindtap="scrollToSection" data-id="experience">
+      <view class="nav-icon nav-green">🌾</view>
+      <text class="nav-text">农事体验</text>
+    </view>
+    <view class="nav-item" bindtap="scrollToSection" data-id="guide">
+      <view class="nav-icon nav-blue">🧭</view>
+      <text class="nav-text">向导预约</text>
+    </view>
+    <view class="nav-item" bindtap="scrollToSection" data-id="shop">
+      <view class="nav-icon nav-orange">🛍️</view>
+      <text class="nav-text">特产商城</text>
+    </view>
+    <view class="nav-item" bindtap="goToMinsu">
+      <view class="nav-icon nav-teal">🏡</view>
+      <text class="nav-text">民宿住宿</text>
+    </view>
+  </view>
+
+  <!-- 农事体验（含采摘） -->
+  <view class="section" id="experience">
+    <view class="section-header-row">
+      <view class="section-title-wrap">
+        <view class="title-bar title-bar-green"></view>
+        <text class="section-title">农事体验</text>
+      </view>
+      <text class="see-more" bindtap="goToExperience">查看全部 ›</text>
+    </view>
+    <text class="section-sub">插秧摸鱼 · 果蔬采摘 · 亲近自然</text>
+
+    <!-- 活动类型 -->
+    <view class="activity-chips">
+      <view class="a-chip a-chip-active" bindtap="goToPicking">
+        <text>🍎 果蔬采摘</text>
+      </view>
+      <view class="a-chip" bindtap="showFarmActivity" data-type="插秧">
+        <text>🌱 插秧体验</text>
+      </view>
+      <view class="a-chip" bindtap="showFarmActivity" data-type="摸鱼">
+        <text>🐟 摸鱼捉虾</text>
+      </view>
+      <view class="a-chip" bindtap="showFarmActivity" data-type="农具">
+        <text>🪣 农具体验</text>
+      </view>
+    </view>
+
+    <!-- 精选采摘点 -->
+    <scroll-view scroll-x class="horizontal-scroll" style="margin-top:24rpx;">
+      <view class="scroll-item" wx:for="{{featuredSpots}}" wx:key="id" bindtap="goToPickingDetail" data-id="{{item.id}}">
+        <view class="spot-mini-card">
+          <image class="spot-mini-img" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="spot-mini-info">
+            <text class="spot-mini-name">{{item.name}}</text>
+            <text class="spot-mini-price">{{item.price}}</text>
+            <text class="spot-mini-season">📅 {{item.season}}</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="more-btn" bindtap="goToExperience">
+      <text>查看更多农事体验 →</text>
+    </view>
+  </view>
+
+  <!-- 乡村向导预约 -->
+  <view class="section section-light-blue" id="guide">
+    <view class="section-header-row">
+      <view class="section-title-wrap">
+        <view class="title-bar title-bar-blue"></view>
+        <text class="section-title">乡村向导预约</text>
+      </view>
+      <text class="see-more see-more-blue" bindtap="goToGuide">查看全部 ›</text>
+    </view>
+    <text class="section-sub">专业本地向导，带您深度游览苗寨农家</text>
+
+    <view class="guide-preview-list">
+      <view class="guide-preview-card" wx:for="{{tourGuides}}" wx:key="id">
+        <image class="guide-preview-avatar" src="{{item.avatar}}" mode="aspectFill"></image>
+        <view class="guide-preview-info">
+          <view class="guide-preview-header">
+            <text class="guide-preview-name">{{item.name}}</text>
+            <view class="guide-preview-rating">
+              <text>⭐ {{item.rating}}</text>
+            </view>
+          </view>
+          <text class="guide-preview-specialty">🧭 {{item.specialty}}</text>
+          <view class="guide-preview-tags">
+            <text class="gtag" wx:for="{{item.tags}}" wx:key="*this" wx:for-item="gtitem">{{gtitem}}</text>
+          </view>
+          <view class="guide-preview-footer">
+            <text class="guide-preview-price">{{item.price}}</text>
+            <view class="guide-book-btn {{item.available ? '' : 'btn-disabled'}}" catchtap="bookGuide" data-index="{{index}}">
+              <text>{{item.available ? '立即预约' : '已约满'}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="more-btn more-btn-blue" bindtap="goToGuide">
+      <text>查看全部向导 →</text>
+    </view>
+  </view>
+
+  <!-- 特产商城 -->
+  <view class="section" id="shop">
+    <view class="section-header-row">
+      <view class="section-title-wrap">
+        <view class="title-bar title-bar-orange"></view>
+        <text class="section-title">苗家特产</text>
+      </view>
+      <text class="see-more see-more-orange" bindtap="goToShop">进入商城 ›</text>
+    </view>
+    <text class="section-sub">地道苗家好物，产地直供品质保证</text>
+
+    <view class="product-grid">
+      <view class="product-card" wx:for="{{featuredProducts}}" wx:key="id" bindtap="goToShop">
+        <image class="product-img" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="product-cat-badge">{{item.category}}</view>
+        <view class="product-info">
+          <text class="product-name">{{item.name}}</text>
+          <view class="product-bottom">
+            <view class="product-price-row">
+              <text class="product-price">¥{{item.price}}</text>
+              <text class="product-unit">/{{item.unit}}</text>
+            </view>
+            <view class="add-cart-btn" catchtap="addToCart" data-id="{{item.id}}">+</view>
+          </view>
+          <text class="product-sales">已售{{item.sales}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="more-btn more-btn-orange" bindtap="goToShop">
+      <text>进入特产商城，查看更多好物 →</text>
+    </view>
+  </view>
+
+</view>

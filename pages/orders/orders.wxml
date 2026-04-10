@@ -1,0 +1,172 @@
+<!--pages/orders/orders.wxml - 我的订单-->
+<view class="page-orders {{elderMode ? 'elder-mode' : ''}}">
+
+  <!-- 朗读按钮（悬浮） -->
+  <view class="read-aloud-btn" bindtap="onReadAloud" wx:if="{{elderMode}}">
+    <text class="read-icon">🔊</text>
+    <text class="read-label">朗读</text>
+  </view>
+
+  <!-- 顶部标签切换 -->
+  <view class="tabs">
+    <view class="tab-item {{currentTab === item.key ? 'active' : ''}}" 
+          wx:for="{{tabs}}" wx:key="key" 
+          bindtap="switchTab" data-tab="{{item.key}}">
+      <text>{{item.label}}</text>
+    </view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-list" wx:if="{{orders.length > 0}}">
+    <view class="order-card" wx:for="{{orders}}" wx:key="orderId">
+      <!-- 订单头部 -->
+      <view class="order-header">
+        <view class="order-type-wrap">
+          <text class="order-type-icon" wx:if="{{item.displayType === 'machinery'}}">🚜</text>
+          <text class="order-type-icon" wx:if="{{item.displayType === 'jobs'}}">💼</text>
+          <text class="order-type-icon" wx:if="{{item.displayType === 'picking'}}">🍎</text>
+          <text class="order-type-icon" wx:if="{{item.displayType === 'minsu'}}">🏡</text>
+          <text class="order-type-label" wx:if="{{item.displayType === 'machinery'}}">农机租用</text>
+          <text class="order-type-label" wx:if="{{item.displayType === 'jobs'}}">务工申请</text>
+          <text class="order-type-label" wx:if="{{item.displayType === 'picking'}}">采摘预订</text>
+          <text class="order-type-label" wx:if="{{item.displayType === 'minsu'}}">民宿预订</text>
+        </view>
+        <text class="order-status {{statusColorMap[item.status]}}">{{statusMap[item.status]}}</text>
+      </view>
+
+      <!-- 订单内容 -->
+      <view class="order-body" bindtap="goToDetail" data-order="{{item}}">
+        <text class="order-title">{{item.itemName}}</text>
+        
+        <!-- 农机订单详情 -->
+        <view wx:if="{{item.displayType === 'machinery'}}" class="order-info">
+          <view class="order-info-row">
+            <text class="info-label">开始日期：</text>
+            <text class="info-value">{{item.startDate}}</text>
+          </view>
+          <view class="order-info-row">
+            <text class="info-label">租用天数：</text>
+            <text class="info-value">{{item.duration}}天</text>
+          </view>
+          <view class="order-info-row">
+            <text class="info-label">预计费用：</text>
+            <text class="info-value price-text">¥{{item.totalCost}}</text>
+          </view>
+        </view>
+
+        <!-- 务工订单详情 -->
+        <view wx:if="{{item.displayType === 'jobs'}}" class="order-info">
+          <view class="order-info-row">
+            <text class="info-label">工作地点：</text>
+            <text class="info-value">{{item.location}}</text>
+          </view>
+          <view class="order-info-row">
+            <text class="info-label">薪资待遇：</text>
+            <text class="info-value price-text">{{item.salary}}</text>
+          </view>
+          <view class="order-info-row">
+            <text class="info-label">工作时长：</text>
+            <text class="info-value">{{item.jobDuration}}</text>
+          </view>
+        </view>
+
+        <!-- 采摘订单详情 -->
+        <view wx:if="{{item.displayType === 'picking'}}" class="order-info">
+          <view class="order-info-row">
+            <text class="info-label">到访日期：</text>
+            <text class="info-value">{{item.visitDate}}</text>
+          </view>
+          <view class="order-info-row">
+            <text class="info-label">预订人数：</text>
+            <text class="info-value">{{item.peopleCount}}人</text>
+          </view>
+          <view class="order-info-row">
+            <text class="info-label">预计费用：</text>
+            <text class="info-value price-text">¥{{item.totalCost}}</text>
+          </view>
+        </view>
+
+        <view wx:if="{{item.displayType === 'minsu'}}" class="order-info">
+          <view class="order-info-row">
+            <text class="info-label">入住日期：</text>
+            <text class="info-value">{{item.visitDate}}</text>
+          </view>
+          <view class="order-info-row">
+            <text class="info-label">入住人数：</text>
+            <text class="info-value">{{item.peopleCount}}人</text>
+          </view>
+          <view class="order-info-row">
+            <text class="info-label">预计费用：</text>
+            <text class="info-value price-text">¥{{item.totalCost}}</text>
+          </view>
+        </view>
+
+        <view class="order-meta">
+          <text class="order-id">订单号：{{item.orderId}}</text>
+          <text class="order-time">{{item.createTime}}</text>
+        </view>
+      </view>
+
+      <!-- 订单操作 -->
+      <view class="order-footer">
+        <view class="order-contact" bindtap="callPhone" data-phone="{{item.contactPhone}}">
+          <text>📞 联系对方</text>
+        </view>
+        <view class="order-actions">
+          <view class="action-btn action-cancel" 
+                wx:if="{{item.status === 'pending' || item.status === 'confirmed'}}" 
+                catchtap="onCancelOrder" data-id="{{item.orderId}}">
+            取消订单
+          </view>
+          <view class="action-btn action-complete" 
+                wx:if="{{item.status === 'confirmed'}}" 
+                catchtap="onCompleteOrder" data-id="{{item.orderId}}">
+            确认完成
+          </view>
+          <view class="action-btn action-rate" 
+                wx:if="{{item.status === 'completed' && !item.rating}}" 
+                catchtap="onShowRating" data-id="{{item.orderId}}">
+            ⭐ 评价
+          </view>
+        </view>
+      </view>
+
+      <!-- 已评价显示 -->
+      <view class="order-rating-display" wx:if="{{item.rating}}">
+        <text class="rating-label">我的评价：</text>
+        <view class="rating-stars-show">
+          <text wx:for="{{5}}" wx:key="*this" wx:for-item="star" wx:for-index="starIdx" class="star-icon-show">{{starIdx < item.rating ? '⭐' : '☆'}}</text>
+        </view>
+        <text class="rating-score">{{item.rating}}星</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{orders.length === 0}}">
+    <text class="empty-icon-text">📋</text>
+    <text class="empty-text">暂无订单</text>
+    <text class="empty-hint">去预约农机、申请务工或预订采摘/民宿吧</text>
+  </view>
+
+  <!-- 评价弹窗 -->
+  <view class="rating-modal-mask" wx:if="{{showRatingModal}}" bindtap="onCloseRating">
+    <view class="rating-modal" catchtap="">
+      <text class="rating-modal-title">请为本次服务评分</text>
+      <text class="rating-modal-subtitle">您的评价将帮助其他用户做出更好的选择</text>
+      <view class="rating-stars">
+        <view class="rating-star-item" 
+              wx:for="{{5}}" wx:key="*this" wx:for-index="starIdx"
+              catchtap="onSelectStar" data-star="{{starIdx + 1}}">
+          <text class="rating-star {{ratingScore >= starIdx + 1 ? 'star-active' : 'star-inactive'}}">{{ratingScore >= starIdx + 1 ? '⭐' : '☆'}}</text>
+        </view>
+      </view>
+      <text class="rating-score-text">{{ratingScore > 0 ? ratingScore + ' 星' : '请点击星星评分'}}</text>
+      <view class="rating-modal-btns">
+        <view class="rating-btn-cancel" bindtap="onCloseRating">取消</view>
+        <view class="rating-btn-confirm" bindtap="onSubmitRating">提交评价</view>
+      </view>
+    </view>
+  </view>
+
+</view>

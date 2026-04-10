@@ -1,0 +1,121 @@
+<!--pages/minsu-detail/minsu-detail.wxml-->
+<view class="page-detail {{elderMode ? 'elder-mode' : ''}}">
+
+  <!-- 朗读按钮（悬浮） -->
+  <view class="read-aloud-btn" bindtap="onReadAloud" wx:if="{{elderMode}}">
+    <text class="read-icon">🔊</text>
+    <text class="read-label">朗读</text>
+  </view>
+
+  <view wx:if="{{minsu}}">
+    <!-- 图片 -->
+    <image class="detail-image" src="{{minsu.image}}" mode="aspectFill"></image>
+
+    <!-- 基本信息 -->
+    <view class="detail-info">
+      <view class="flex-between">
+        <text class="detail-name">{{minsu.name}}</text>
+        <text class="badge badge-green">可预订</text>
+      </view>
+      <view class="price-row">
+        <text class="detail-price">{{minsu.price}}</text>
+      </view>
+      <view class="item-rating" style="margin-top:12rpx;">
+        <view class="rating-stars-inline">
+          <text wx:for="{{5}}" wx:key="*this" wx:for-item="star" wx:for-index="starIdx" class="star-sm">{{starIdx < minsuRating ? '⭐' : '☆'}}</text>
+        </view>
+        <text class="rating-num">{{minsuRating}}</text>
+        <text class="rating-count" wx:if="{{minsuRatingCount > 0}}">({{minsuRatingCount}}条评价)</text>
+      </view>
+      <view class="tag-list" style="margin-top:16rpx;">
+        <text class="tag tag-green" wx:for="{{minsu.features}}" wx:key="*this">{{item}}</text>
+      </view>
+      <text class="detail-desc">{{minsu.description}}</text>
+    </view>
+
+    <!-- 住宿信息 -->
+    <view class="detail-card">
+      <text class="card-title">住宿信息</text>
+      <view class="info-list">
+        <view class="info-item">
+          <text class="info-label">📍 地址</text>
+          <text class="info-value">{{minsu.address}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">🏠 客房数量</text>
+          <text class="info-value">{{minsu.rooms}}间</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">💰 价格</text>
+          <text class="info-value">{{minsu.price}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">📞 联系电话</text>
+          <text class="info-value link" bindtap="callMinsu">{{minsu.phone}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 配套农事体验 -->
+    <view class="detail-card">
+      <text class="card-title">🌿 配套农事体验</text>
+      <view class="exp-list">
+        <view class="exp-item" wx:for="{{minsu.farmExperiences}}" wx:key="name">
+          <view class="exp-icon-wrap">
+            <text class="exp-icon">{{item.icon}}</text>
+          </view>
+          <view class="exp-info">
+            <text class="exp-name">{{item.name}}</text>
+            <text class="exp-duration">⏱ 约{{item.duration}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 预订表单 -->
+    <view class="detail-card" wx:if="{{showBookForm}}">
+      <text class="card-title">预订民宿</text>
+      <view class="form-group">
+        <text class="form-label">姓名 *</text>
+        <input class="form-input" placeholder="请输入姓名" bindinput="onInput" data-field="userName"/>
+      </view>
+      <view class="form-group">
+        <text class="form-label">联系电话 *</text>
+        <input class="form-input" type="number" placeholder="请输入电话号码" bindinput="onInput" data-field="phone"/>
+      </view>
+      <view class="form-group">
+        <text class="form-label">入住日期 *</text>
+        <picker mode="date" bindchange="onCheckinChange">
+          <view class="form-picker">
+            <text>{{formData.checkinDate || '请选择入住日期'}}</text>
+            <text>▾</text>
+          </view>
+        </picker>
+      </view>
+      <view class="form-group">
+        <text class="form-label">入住晚数 *</text>
+        <input class="form-input" type="number" placeholder="请输入入住晚数" bindinput="onInput" data-field="nights"/>
+      </view>
+      <view class="form-group">
+        <text class="form-label">入住人数</text>
+        <input class="form-input" type="number" placeholder="请输入人数（选填）" bindinput="onInput" data-field="guestCount"/>
+      </view>
+      <view class="cost-preview" wx:if="{{formData.nights}}">
+        <text class="cost-label">预计费用：</text>
+        <text class="cost-value">¥{{minsu.priceNum * formData.nights}}</text>
+      </view>
+      <view class="btn btn-primary btn-lg" style="margin-top:30rpx;" bindtap="submitBooking">确认预订</view>
+    </view>
+
+    <!-- 底部操作 -->
+    <view class="bottom-bar">
+      <view class="bottom-btn-left" bindtap="callMinsu">
+        <text class="bottom-icon">📞</text>
+        <text class="bottom-label">联系民宿</text>
+      </view>
+      <view class="bottom-btn-right" bindtap="toggleBookForm">
+        <text>{{showBookForm ? '收起表单' : '立即预订'}}</text>
+      </view>
+    </view>
+  </view>
+</view>
