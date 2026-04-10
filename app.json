@@ -1,0 +1,75 @@
+{
+  "pages": [
+    "pages/redculture/redculture",
+    "pages/miao/miao",
+    "pages/agriservice/agriservice",
+    "pages/tourism/tourism",
+    "pages/mine/mine",
+    "pages/machinery/machinery",
+    "pages/jobs/jobs",
+    "pages/picking/picking",
+    "pages/machinery-detail/machinery-detail",
+    "pages/jobs-detail/jobs-detail",
+    "pages/picking-detail/picking-detail",
+    "pages/minsu-detail/minsu-detail",
+    "pages/index/index",
+    "pages/guide/guide",
+    "pages/shop/shop",
+    "pages/about/about",
+    "pages/partnership/partnership",
+    "pages/orders/orders",
+    "pages/publish/publish",
+    "pages/settings/settings",
+    "pages/insurance/insurance",
+    "pages/dispute/dispute",
+    "pages/emergency/emergency",
+    "pages/contract/contract"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#C62828",
+    "navigationBarTitleText": "乡村振兴平台",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f5f5f5"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#C62828",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/redculture/redculture",
+        "text": "红色传承",
+        "iconPath": "images/tab-red.png",
+        "selectedIconPath": "images/tab-red-active.png"
+      },
+      {
+        "pagePath": "pages/miao/miao",
+        "text": "苗乡风情",
+        "iconPath": "images/tab-miao.png",
+        "selectedIconPath": "images/tab-miao-active.png"
+      },
+      {
+        "pagePath": "pages/agriservice/agriservice",
+        "text": "农事服务",
+        "iconPath": "images/tab-agri.png",
+        "selectedIconPath": "images/tab-agri-active.png"
+      },
+      {
+        "pagePath": "pages/tourism/tourism",
+        "text": "乡村旅游",
+        "iconPath": "images/tab-tourism.png",
+        "selectedIconPath": "images/tab-tourism-active.png"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的",
+        "iconPath": "images/tab-mine.png",
+        "selectedIconPath": "images/tab-mine-active.png"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2"
+}

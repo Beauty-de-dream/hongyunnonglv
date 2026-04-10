@@ -1,0 +1,1019 @@
+// app.js
+// 引入工具函数
+const { deepClone, mergeListById, formatTime } = require('./utils/dataHelper.js');
+
+// 引入数据文件
+const machineryData = require('./data/machinery.js');
+const jobsData = require('./data/jobs.js');
+const pickingSpotsData = require('./data/pickingSpots.js');
+const minsuSpotsData = require('./data/minsuSpots.js');
+const redCultureData = require('./data/redCulture.js');
+const miaoCultureData = require('./data/miaoCulture.js');
+const tourismData = require('./data/tourism.js');
+const productsData = require('./data/products.js');
+const commonData = require('./data/common.js');
+
+App({
+  onLaunch() {
+    this.captureDefaultData();
+    // 小程序启动时执行
+    console.log("滴滴打农小程序启动");
+    // 从本地存储恢复订单数据
+    const orders = wx.getStorageSync("orders");
+    if (orders) {
+      this.globalData.orders = this.normalizeStoredOrders(orders);
+      wx.setStorageSync("orders", this.globalData.orders);
+    }
+    // 从本地存储恢复用户发布数据
+    const userMachinery = wx.getStorageSync("userMachinery");
+    if (userMachinery) {
+      this.globalData.userMachinery = userMachinery;
+    }
+    const userJobs = wx.getStorageSync("userJobs");
+    if (userJobs) {
+      this.globalData.userJobs = userJobs;
+    }
+    const userPickingSpots = wx.getStorageSync("userPickingSpots");
+    if (userPickingSpots) {
+      this.globalData.userPickingSpots = userPickingSpots;
+    }
+    // 从本地存储恢复评价数据
+    const ratings = wx.getStorageSync("ratings");
+    if (ratings) {
+      this.globalData.ratings = ratings;
+    }
+    // 恢复老人模式设置
+    const elderMode = wx.getStorageSync("elderMode");
+    this.globalData.elderMode = !!elderMode;
+    this.rebuildPublishedLists();
+  },
+
+  captureDefaultData() {
+    if (this._defaultData) {
+      return;
+    }
+    this._defaultData = {
+      machinery: deepClone(this.globalData.machinery),
+      jobs: deepClone(this.globalData.jobs),
+      pickingSpots: deepClone(this.globalData.pickingSpots),
+      minsuSpots: deepClone(this.globalData.minsuSpots),
+      testimonials: deepClone(this.globalData.testimonials),
+      stats: deepClone(this.globalData.stats),
+    };
+  },
+
+  normalizeStoredOrders(orders = []) {
+    return orders.map((order) => {
+      if (order.orderCategory === "minsu" && order.type !== "minsu") {
+        return {
+          ...order,
+          type: "minsu",
+        };
+      }
+      return order;
+    });
+  },
+
+  rebuildPublishedLists() {
+    this.captureDefaultData();
+    this.globalData.machinery = mergeListById(
+      this._defaultData.machinery,
+      this.globalData.userMachinery
+    );
+    this.globalData.jobs = mergeListById(
+      this._defaultData.jobs,
+      this.globalData.userJobs
+    );
+    this.globalData.pickingSpots = mergeListById(
+      this._defaultData.pickingSpots,
+      this.globalData.userPickingSpots
+    );
+  },
+
+  resetRuntimeData() {
+    this.captureDefaultData();
+    this.globalData.orders = [];
+    this.globalData.ratings = {};
+    this.globalData.userMachinery = [];
+    this.globalData.userJobs = [];
+    this.globalData.userPickingSpots = [];
+    this.globalData.userInfo = null;
+    this.globalData.elderMode = false;
+    this.globalData.pendingContract = null;
+    this.globalData.machinery = deepClone(this._defaultData.machinery);
+    this.globalData.jobs = deepClone(this._defaultData.jobs);
+    this.globalData.pickingSpots = deepClone(this._defaultData.pickingSpots);
+    this.globalData.minsuSpots = deepClone(this._defaultData.minsuSpots);
+    this.globalData.testimonials = deepClone(this._defaultData.testimonials);
+    this.globalData.stats = deepClone(this._defaultData.stats);
+  },
+
+  getOrderType(order) {
+    if (!order) {
+      return "";
+    }
+    return order.orderCategory === "minsu" ? "minsu" : order.type;
+  },
+
+  // ============ 订单管理方法 ============
+
+  // 添加订单
+  addOrder(order) {
+    const orderData = {
+      ...order,
+      orderId: "DD" + Date.now() + Math.floor(Math.random() * 1000),
+      createTime: formatTime(new Date()),
+      status: order.status || "pending", // pending, confirmed, completed, cancelled
+    };
+    this.globalData.orders.unshift(orderData);
+    wx.setStorageSync("orders", this.globalData.orders);
+    return orderData;
+  },
+
+  // 获取指定类型订单
+  getOrders(type) {
+    if (!type || type === "all") {
+      return this.globalData.orders;
+    }
+    return this.globalData.orders.filter((order) => {
+      const orderType = this.getOrderType(order);
+      if (type === "picking") {
+        return orderType === "picking" || orderType === "minsu";
+      }
+      return orderType === type;
+    });
+  },
+
+  // 获取订单统计
+  getOrderCounts() {
+    const orders = this.globalData.orders;
+    const getTypeCount = (type) =>
+      orders.filter((order) => this.getOrderType(order) === type).length;
+    const minsu = getTypeCount("minsu");
+    return {
+      machinery: getTypeCount("machinery"),
+      jobs: getTypeCount("jobs"),
+      picking: getTypeCount("picking") + minsu,
+      minsu,
+      all: orders.length,
+    };
+  },
+
+  // 更新订单状态
+  updateOrderStatus(orderId, status) {
+    const order = this.globalData.orders.find((o) => o.orderId === orderId);
+    if (order) {
+      order.status = status;
+      order.updateTime = formatTime(new Date());
+      wx.setStorageSync("orders", this.globalData.orders);
+    }
+  },
+
+  // 取消订单
+  cancelOrder(orderId) {
+    this.updateOrderStatus(orderId, "cancelled");
+  },
+
+  // ============ 评价管理方法 ============
+
+  // 添加评价
+  addRating(type, itemId, score) {
+    const key = type + "_" + itemId;
+    if (!this.globalData.ratings[key]) {
+      this.globalData.ratings[key] = [];
+    }
+    this.globalData.ratings[key].push(score);
+    wx.setStorageSync("ratings", this.globalData.ratings);
+  },
+
+  // 获取平均评分（无评价时默认4星）
+  getAverageRating(type, itemId) {
+    const key = type + "_" + itemId;
+    const scores = this.globalData.ratings[key];
+    if (!scores || scores.length === 0) {
+      return 4;
+    }
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    return Math.round(avg * 10) / 10;
+  },
+
+  // 获取评价数量
+  getRatingCount(type, itemId) {
+    const key = type + "_" + itemId;
+    const scores = this.globalData.ratings[key];
+    return scores ? scores.length : 0;
+  },
+
+  // 为订单设置评价
+  rateOrder(orderId, score) {
+    const order = this.globalData.orders.find((o) => o.orderId === orderId);
+    if (order) {
+      order.rating = score;
+      order.rateTime = formatTime(new Date());
+      this.addRating(this.getOrderType(order), order.itemId, score);
+      wx.setStorageSync("orders", this.globalData.orders);
+    }
+  },
+
+  // ============ 发布管理方法 ============
+
+  // 发布农机
+  publishMachinery(data) {
+    const item = {
+      ...data,
+      id: Date.now(),
+      available: true,
+      isUserPublished: true,
+      publishTime: formatTime(new Date()),
+    };
+    this.globalData.machinery.push(item);
+    this.globalData.userMachinery.push(item);
+    wx.setStorageSync("userMachinery", this.globalData.userMachinery);
+    return item;
+  },
+
+  // 发布务工招聘
+  publishJob(data) {
+    const item = {
+      ...data,
+      id: Date.now(),
+      isUserPublished: true,
+      publishTime: formatTime(new Date()),
+    };
+    this.globalData.jobs.push(item);
+    this.globalData.userJobs.push(item);
+    wx.setStorageSync("userJobs", this.globalData.userJobs);
+    return item;
+  },
+
+  // 发布采摘点
+  publishPickingSpot(data) {
+    const item = {
+      ...data,
+      id: Date.now(),
+      isUserPublished: true,
+      publishTime: formatTime(new Date()),
+    };
+    this.globalData.pickingSpots.push(item);
+    this.globalData.userPickingSpots.push(item);
+    wx.setStorageSync("userPickingSpots", this.globalData.userPickingSpots);
+    return item;
+  },
+
+  // ============ 老人模式管理 ============
+
+  // 切换老人模式
+  toggleElderMode(enabled) {
+    this.globalData.elderMode = enabled;
+    wx.setStorageSync("elderMode", enabled);
+  },
+
+  // 获取老人模式状态
+  isElderMode() {
+    return this.globalData.elderMode;
+  },
+
+  // 获取当前页面可朗读内容
+  getPageReadContent(pageName) {
+    const contentMap = {
+      index:
+        "欢迎使用滴滴打农平台。这是一个连接农机租赁、助农务工和乡村采摘的综合服务平台。您可以在这里查找农机租赁信息、寻找工作机会、预订采摘体验。",
+      machinery:
+        "这是农机共享页面。您可以在这里浏览各类农机设备，包括拖拉机、收割机、插秧机等。选择心仪的农机后可以进行租用预订。",
+      jobs: "这是助农务工页面。这里展示各类农业工作机会，包括果园管理、田间种植等岗位。您可以筛选地区，找到适合的工作并申请。",
+      picking:
+        "这是乡村采摘页面。您可以浏览各地的采摘园信息，了解可采摘的水果种类、价格和位置，进行在线预订。",
+      mine: "这是个人中心页面。您可以查看我的订单、发布信息、联系客服和修改设置。",
+      settings:
+        "这是设置页面。您可以在这里开启或关闭老人模式。老人模式将使用更大的字体，简化页面内容，让操作更方便。",
+    };
+    return contentMap[pageName] || "当前页面暂无朗读内容";
+  },
+
+  globalData: {
+    // 订单数据
+    orders: [],
+    // 评价数据 { 'machinery_1': [5, 4], 'jobs_2': [3] }
+    ratings: {},
+    // 用户发布数据
+    userMachinery: [],
+    userJobs: [],
+    userPickingSpots: [],
+    userInfo: null,
+    // 老人模式
+    elderMode: false,
+    // 模拟数据 - 农机列表
+    machinery: [
+      {
+        id: 1,
+        name: "东风拖拉机DX1204",
+        type: "拖拉机",
+        price: 300,
+        location: "河南省郑州市",
+        owner: "张师傅",
+        available: true,
+        image: "/images/tractor1.webp",
+        description: "120马力，适合中型农田作业",
+        phone: "13800138001",
+      },
+      {
+        id: 2,
+        name: "雷沃谷神收割机",
+        type: "收割机",
+        price: 500,
+        location: "山东省潍坊市",
+        owner: "李师傅",
+        available: true,
+        image: "/images/product-placeholder-1.svg",
+        description: "效率高，适合水稻、小麦收割",
+        phone: "13800138002",
+      },
+      {
+        id: 3,
+        name: "久保田插秧机",
+        type: "插秧机",
+        price: 200,
+        location: "湖南省长沙市",
+        owner: "王师傅",
+        available: true,
+        image: "/images/planter.webp",
+        description: "自动化程度高，提高插秧效率",
+        phone: "13800138003",
+      },
+      {
+        id: 4,
+        name: "约翰迪尔播种机",
+        type: "播种机",
+        price: 250,
+        location: "湖北省武汉市",
+        owner: "赵师傅",
+        available: true,
+        image: "/images/seeder.webp",
+        description: "精密播种，节省种子，提高出苗率",
+        phone: "13800138004",
+      },
+      {
+        id: 5,
+        name: "沃得锐龙收割机",
+        type: "收割机",
+        price: 450,
+        location: "河南省洛阳市",
+        owner: "孙师傅",
+        available: false,
+        image: "/images/harvester2.jpg",
+        description: "大型联合收割机，日作业面积可达100亩",
+        phone: "13800138005",
+      },
+      {
+        id: 6,
+        name: "中联重科拖拉机",
+        type: "拖拉机",
+        price: 350,
+        location: "山东省济南市",
+        owner: "周师傅",
+        available: true,
+        image: "/images/tractor2.png",
+        description: "180马力大型拖拉机，适合大面积农田",
+        phone: "13800138006",
+      },
+    ],
+
+    // 模拟数据 - 工作列表
+    jobs: [
+      {
+        id: 1,
+        title: "阳光果园采摘员",
+        location: "河南省洛阳市",
+        salary: "150元/天",
+        duration: "7天",
+        requirements: "身体健康，55-70岁",
+        description:
+          "协助游客采摘，维护果园秩序。工作时间为早上8点到下午5点，包含午休时间。提供工作餐和交通补贴。",
+        contact: "13800138001",
+        tags: ["轻体力", "包餐", "交通补贴"],
+      },
+      {
+        id: 2,
+        title: "绿色农场除草工",
+        location: "山东省济南市",
+        salary: "120元/天",
+        duration: "10天",
+        requirements: "能够从事轻体力劳动",
+        description:
+          "农田除草，施肥协助。采用现代化工具作业，劳动强度适中。提供劳动工具和防护装备。",
+        contact: "13800138002",
+        tags: ["工具提供", "防护装备", "灵活时间"],
+      },
+      {
+        id: 3,
+        title: "生态园管理员",
+        location: "湖北省武汉市",
+        salary: "180元/天",
+        duration: "15天",
+        requirements: "有农业经验优先",
+        description:
+          "协助管理生态园日常事务，包括植物浇灌、游客接待、环境维护等。工作环境优美，适合热爱自然的人。",
+        contact: "13800138003",
+        tags: ["环境优美", "经验优先", "长期合作"],
+      },
+      {
+        id: 4,
+        title: "葡萄园修枝员",
+        location: "河北省张家口市",
+        salary: "160元/天",
+        duration: "5天",
+        requirements: "有修枝经验，55-65岁",
+        description:
+          "负责葡萄园的修枝、绑蔓工作。专业技术人员现场指导，工作时间灵活。",
+        contact: "13800138004",
+        tags: ["技术支持", "短期工", "经验优先"],
+      },
+    ],
+
+    // 模拟数据 - 采摘点列表
+    pickingSpots: [
+      {
+        id: 1,
+        name: "春天草莓园",
+        location: "北京市昌平区",
+        latitude: 40.2208,
+        longitude: 116.2313,
+        price: "80元/人",
+        priceNum: 80,
+        season: "12月-5月",
+        features: ["有机种植", "亲子友好", "现摘现吃"],
+        image: "/images/strawberry.jpg",
+        description:
+          "北京最大的草莓采摘基地，品种丰富，采用有机种植方式，口感香甜。园区设施完善，配有儿童游乐区、休息区和停车场。",
+        phone: "010-12345678",
+        address: "北京市昌平区南口镇草莓大道18号",
+      },
+      {
+        id: 2,
+        name: "阳光樱桃园",
+        location: "山东省烟台市",
+        latitude: 37.4638,
+        longitude: 121.4479,
+        price: "60元/人",
+        priceNum: 60,
+        season: "5月-7月",
+        features: ["山地樱桃", "风景优美", "农家乐"],
+        image: "/images/cherry.jpg",
+        description:
+          "烟台大樱桃原产地，品质优良。坐落在山坡上，空气清新，风景如画。园区提供农家乐服务，可品尝地道农家菜。",
+        phone: "0535-12345678",
+        address: "山东省烟台市福山区樱桃路66号",
+      },
+      {
+        id: 3,
+        name: "田园苹果庄园",
+        location: "陕西省咸阳市",
+        latitude: 34.3296,
+        longitude: 108.7093,
+        price: "45元/人",
+        priceNum: 45,
+        season: "9月-11月",
+        features: ["红富士", "无公害", "包装带走"],
+        image: "/images/product-placeholder-2.svg",
+        description:
+          "陕西优质苹果，香甜脆嫩。采用绿色无公害种植技术，果园提供免费包装袋，采摘的水果可带走。",
+        phone: "029-12345678",
+        address: "陕西省咸阳市礼泉县苹果大道99号",
+      },
+      {
+        id: 4,
+        name: "蓝天葡萄庄园",
+        location: "河北省张家口市",
+        latitude: 40.8119,
+        longitude: 115.5170,
+        price: "55元/人",
+        priceNum: 55,
+        season: "8月-10月",
+        features: ["多品种", "亲子体验", "农家餐"],
+        image: "/images/grape.jpg",
+        description:
+          "拥有十余种葡萄品种，从巨峰到阳光玫瑰应有尽有。园区提供亲子体验活动和正宗农家餐。",
+        phone: "0313-12345678",
+        address: "河北省张家口市怀来县葡萄大道 8号",
+      },
+    ],
+
+    // 模拟数据 - 特色民宿列表
+    minsuSpots: [
+      {
+        id: 1,
+        name: "边城故事·吊脚楼民宿",
+        location: "湖南省湘西州凤凰县",
+        price: "328元/晚",
+        priceNum: 328,
+        image: "/images/minsu-fenghuang.jpg",
+        description:
+          "坐落于沱江之畔的百年吊脚楼改造民宿，推窗即见沱江碧水与苗寨风情。配套稻田农场，体验原汁原味的湘西农耕生活。",
+        features: ["沱江美景", "苗族文化", "含早餐"],
+        farmExperiences: [
+          { name: "稻田摸鱼体验", icon: "🐟", duration: "1.5小时" },
+          { name: "苗家酸萝卜制作", icon: "🥒", duration: "2小时" },
+          { name: "苗族蜡染手工", icon: "🎨", duration: "2小时" },
+        ],
+        rooms: 8,
+        phone: "0743-3222888",
+        address: "湖南省湘西州凤凰县沱江镇沿江路18号",
+      },
+      {
+        id: 2,
+        name: "稻花香里·德夯苗寨民宿",
+        location: "湖南省湘西州吉首市",
+        price: "268元/晚",
+        priceNum: 268,
+        image: "/images/minsu-dehang.jpg",
+        description:
+          "隐于德夯大峡谷的苗族风情民宿，白墙青瓦，群山环绕。可体验插秧、打谷等传统苗家农耕文化，感受湘西山水田园。",
+        features: ["峡谷风光", "农耕体验", "苗族歌舞"],
+        farmExperiences: [
+          { name: "梯田插秧体验", icon: "🌾", duration: "2小时" },
+          { name: "苗家腊肉熏制", icon: "🥓", duration: "2小时" },
+          { name: "高山蔬菜采摘", icon: "🥬", duration: "1.5小时" },
+        ],
+        rooms: 6,
+        phone: "0743-8222666",
+        address: "湖南省湘西州吉首市矮寨镇德夯村66号",
+      },
+      {
+        id: 3,
+        name: "芙蓉镇·土家风情院",
+        location: "湖南省湘西州永顺县",
+        price: "358元/晚",
+        priceNum: 358,
+        image: "/images/minsu-furongjhen.jpg",
+        description:
+          "挂在瀑布上的千年古镇民宿，土家族建筑风格，古朴雅致。配套茶园和果园，亲手采摘猕猴桃和制作湘西特色小吃。",
+        features: ["瀑布古镇", "土家文化", "茶园果园"],
+        farmExperiences: [
+          { name: "猕猴桃采摘", icon: "🥝", duration: "2小时" },
+          { name: "莓茶采制体验", icon: "🍵", duration: "2小时" },
+          { name: "土家糍粑制作", icon: "🍡", duration: "1.5小时" },
+        ],
+        rooms: 10,
+        phone: "0743-5222999",
+        address: "湖南省湘西州永顺县芙蓉镇瀑布街99号",
+      },
+      {
+        id: 4,
+        name: "云上苗寨·十八洞村民宿",
+        location: "湖南省湘西州花垣县",
+        price: "238元/晚",
+        priceNum: 238,
+        image: "/images/minsu-shibadong.jpg",
+        description:
+          "精准扶贫首倡地十八洞村的特色苗族民宿，云雾缭绕，溪水潺潺。体验苗绣、养蜂等特色产业，感受乡村振兴新面貌。",
+        features: ["红色研学", "苗绣体验", "蜂蜜基地"],
+        farmExperiences: [
+          { name: "苗绣手工体验", icon: "🧵", duration: "2小时" },
+          { name: "养蜂采蜜体验", icon: "🐝", duration: "1.5小时" },
+          { name: "苗家酸汤制作", icon: "🍲", duration: "2小时" },
+        ],
+        rooms: 8,
+        phone: "0743-7222555",
+        address: "湖南省湘西州花垣县双龙镇十八洞村",
+      },
+    ],
+
+    // 用户评价
+    testimonials: [
+      {
+        name: "张大爷",
+        age: 65,
+        role: "务工人员",
+        content: "通过平台找到了合适的工作，既锻炼了身体，又有了收入，很满意！",
+        rating: 5,
+        avatar: "/images/avatar1.jpg",
+      },
+      {
+        name: "李农户",
+        age: 50,
+        role: "农机租户",
+        content: "租到了质量很好的收割机，价格公道，节省了很多成本。",
+        rating: 5,
+        avatar: "/images/avatar2.jpg",
+      },
+      {
+        name: "王女士",
+        age: 35,
+        role: "游客",
+        content: "带孩子来采摘，体验很棒，孩子玩得很开心，还学到了农业知识。",
+        rating: 4,
+        avatar: "/images/avatar3.jpg",
+      },
+    ],
+
+    // 平台统计数据
+    stats: {
+      machineryCount: 1268,
+      workerCount: 856,
+      gardenCount: 342,
+      satisfaction: 95,
+    },
+
+    // ============ 红色传承数据 ============
+    redStories: [
+      {
+        id: 1,
+        title: "十八洞村的振兴之路",
+        date: "2024-05-20",
+        category: "精准扶贫",
+        summary:
+          '习近平总书记在此首次提出"精准扶贫"重要思想，走出了一条可复制、可推广的乡村振兴之路。',
+        image: "/images/minsu-shibadong.jpg",
+        readCount: 1280,
+        fullContent:
+          '2013年11月，习近平总书记来到湖南省花垣县十八洞村考察，首次提出"精准扶贫"重要思想。十八洞村位于武陵山区腹地，曾是贫困的苗族村寨，通过精准扶贫战略，如今已成为乡村振兴的样板，村民人均年收入从2013年的1668元增至2023年的25000余元。',
+      },
+      {
+        id: 2,
+        title: "红军长征在湘西的足迹",
+        date: "2024-04-15",
+        category: "党史教育",
+        summary:
+          "1935年，红军途经湘西，播下了革命火种，留下了感人至深的历史故事。",
+        image: "/images/minsu-dehang.jpg",
+        readCount: 987,
+        fullContent:
+          "1935年，中国工农红军二六军团在贺龙、萧克率领下转战湘西，途经凤凰、花垣、吉首等地。红军纪律严明，秋毫无犯，为当地百姓播下了革命的种子，留下了许多可歌可泣的英雄故事，至今仍被湘西人民深切缅怀。",
+      },
+      {
+        id: 3,
+        title: "湘西革命英雄：贺龙元帅的故乡",
+        date: "2024-03-10",
+        category: "革命先烈",
+        summary: "贺龙元帅是湘西桑植人，他的革命精神激励着一代又一代湘西儿女。",
+        image: "/images/minsu-fenghuang.jpg",
+        readCount: 756,
+        fullContent:
+          "贺龙元帅（1896-1969），湖南桑植人，中国人民解放军的创始人之一。他在湘西领导了著名的南昌起义，并长期在湘西、鄂西地区开展武装斗争，建立了湘鄂西革命根据地，为中国革命作出了不可磨灭的贡献。",
+      },
+      {
+        id: 4,
+        title: "凤凰古城：百年历史的红色见证",
+        date: "2024-02-28",
+        category: "红色遗址",
+        summary: "凤凰古城不仅是文化名城，也是湘西近代革命的重要发源地之一。",
+        image: "/images/minsu-furongjhen.jpg",
+        readCount: 1102,
+        fullContent:
+          "凤凰古城建于清康熙年间，这里孕育了沈从文等文化名人，也是湘西近代革命运动的重要据点。城中留存有大量革命历史遗址，记录了湘西人民在中国共产党领导下英勇抗争、走向解放的光辉历程。",
+      },
+    ],
+
+    redSites: [
+      {
+        id: 1,
+        name: "十八洞村精准扶贫纪念馆",
+        location: "湖南省花垣县双龙镇",
+        address: "花垣县双龙镇十八洞村村委会旁",
+        description:
+          '全国精准扶贫示范地，习近平总书记曾在此提出"精准扶贫"重要思想。馆内陈列丰富的图文资料和实物展品，真实记录了十八洞村从贫困到振兴的感人历程。',
+        image: "/images/minsu-shibadong.jpg",
+        openTime: "09:00 - 17:00（周一闭馆）",
+        price: "免费",
+        checked: 234,
+      },
+      {
+        id: 2,
+        name: "湘西革命历史纪念馆",
+        location: "湖南省吉首市",
+        address: "吉首市人民路革命纪念园内",
+        description:
+          "系统展示湘西地区革命历史，收藏了大量珍贵历史文物和革命文献，是湖南省爱国主义教育的重要示范基地。",
+        image: "/images/minsu-dehang.jpg",
+        openTime: "08:30 - 17:30",
+        price: "免费",
+        checked: 189,
+      },
+      {
+        id: 3,
+        name: "贺龙故居",
+        location: "湖南省张家界市桑植县",
+        address: "桑植县洪家关白族乡贺龙村",
+        description:
+          "全国重点文物保护单位，贺龙元帅出生和成长的地方。故居内完整保留了贺龙早年生活的历史环境，是缅怀革命先辈、开展党史教育的重要场所。",
+        image: "/images/minsu-fenghuang.jpg",
+        openTime: "全天开放",
+        price: "免费",
+        checked: 312,
+      },
+    ],
+
+    redGuides: [
+      {
+        id: 1,
+        name: "杨明志",
+        avatar: "/images/avatar1.jpg",
+        specialty: "湘西革命史 · 十八洞村精准扶贫",
+        experience: "8",
+        rating: 4.9,
+        ratingCount: 128,
+        price: "200元/次",
+        intro:
+          "历史学专业，深耕湘西红色文化研究15年，曾参与多部地方党史编著工作，讲解生动详实。",
+        available: true,
+      },
+      {
+        id: 2,
+        name: "田秀英",
+        avatar: "/images/avatar2.jpg",
+        specialty: "精准扶贫 · 乡村振兴历程",
+        experience: "5",
+        rating: 4.8,
+        ratingCount: 96,
+        price: "150元/次",
+        intro:
+          "前十八洞村党支部书记助理，亲历扶贫历程，讲解真实感人，深受游客好评。",
+        available: true,
+      },
+      {
+        id: 3,
+        name: "龙云山",
+        avatar: "/images/avatar3.jpg",
+        specialty: "贺龙故居 · 湘西革命武装斗争史",
+        experience: "12",
+        rating: 4.9,
+        ratingCount: 203,
+        price: "250元/次",
+        intro:
+          "国家一级导游，湘西文史研究员，对湘西近代革命历史了如指掌，曾获省级优秀讲解员称号。",
+        available: false,
+      },
+    ],
+
+    redComments: [
+      {
+        id: 1,
+        author: "王大山",
+        content:
+          "参观十八洞村后深受感动，精准扶贫的故事让人热泪盈眶，深刻感受到了党的伟大力量！",
+        date: "2024-06-20",
+        likes: 45,
+      },
+      {
+        id: 2,
+        author: "李秀花",
+        content:
+          "讲解员讲得特别好，把历史讲活了。孩子们听得格外认真，这种红色教育意义深远。",
+        date: "2024-06-18",
+        likes: 32,
+      },
+      {
+        id: 3,
+        author: "张建国",
+        content:
+          "革命先辈的艰辛奋斗令人敬仰，我们要不忘初心，继续前行，把美丽乡村建设得更好！",
+        date: "2024-06-15",
+        likes: 67,
+      },
+    ],
+
+    // ============ 苗乡风情数据 ============
+    miaoCultures: [
+      {
+        id: 1,
+        name: "苗族服饰",
+        icon: "👘",
+        color: "#AD1457",
+        bgColor: "#FCE4EC",
+        description:
+          '苗族服饰是苗族文化的重要载体，以精美刺绣、银饰点缀为特色，分支系众多，风格各异，被誉为"穿在身上的史书"，蕴含着苗族数千年的历史与文化记忆。',
+        features: ["蜡染工艺", "手工刺绣", "银饰点缀", "色彩绚丽"],
+      },
+      {
+        id: 2,
+        name: "苗族银饰",
+        icon: "💎",
+        color: "#37474F",
+        bgColor: "#ECEFF1",
+        description:
+          '苗族银饰是最具代表性的非物质文化遗产之一，以银泡、银角、银链、银铃为主要形式，纯手工锻造，工艺精湛，寓意吉祥，素有"以银为美"之说。',
+        features: ["纯手工锻造", "图案精美", "寓意吉祥", "世代相传"],
+      },
+      {
+        id: 3,
+        name: "苗族刺绣",
+        icon: "🎨",
+        color: "#6A1B9A",
+        bgColor: "#F3E5F5",
+        description:
+          '苗绣是苗族文化的"活化石"，通过针线将苗族的神话、历史、图腾等文化记录下来，针法多达数十种，2006年被列入国家非物质文化遗产名录。',
+        features: ["国家非遗", "图腾文化", "针法多样", "历史记录"],
+      },
+      {
+        id: 4,
+        name: "芦笙文化",
+        icon: "🎵",
+        color: "#2E7D32",
+        bgColor: "#E8F5E9",
+        description:
+          "芦笙是苗族最具代表性的乐器，芦笙节是苗族最盛大的传统节日之一。芦笙舞是苗族重要的文化表达方式，集乐器演奏与舞蹈于一体，气势恢宏。",
+        features: ["传统乐器", "节庆必备", "集体舞蹈", "文化传承"],
+      },
+    ],
+
+    miaoFestivals: [
+      {
+        id: 1,
+        name: "苗年节",
+        date: "2024-11-25",
+        daysLeft: 152,
+        location: "湖南省花垣县、凤凰县各苗寨",
+        description:
+          '苗族传统新年，又称"苗历新年"，是苗族最隆重的节日。届时苗民穿盛装、跳芦笙舞、赶苗年集，热闹非凡，是体验苗族文化的最佳时机。',
+        activities: ["芦笙舞表演", "苗族服饰展示", "传统美食品尝", "打糍粑"],
+        icon: "🎊",
+      },
+      {
+        id: 2,
+        name: "姊妹节",
+        date: "2024-04-18",
+        daysLeft: -65,
+        location: "贵州省台江县施洞镇",
+        description:
+          '苗族女性的专属节日，被誉为"苗族情人节"。节日期间苗族女性穿盛装、吃姊妹饭、跳芦笙舞，展现苗族女性的美丽与智慧，是苗族最富特色的节庆之一。',
+        activities: ["姊妹饭", "芦笙舞", "苗族歌谣对唱", "银饰展示"],
+        icon: "💃",
+      },
+      {
+        id: 3,
+        name: "苗族芦笙节",
+        date: "2024-10-12",
+        daysLeft: 108,
+        location: "湖南省吉首市矮寨",
+        description:
+          "以芦笙表演为主题的民俗节日，各村寨芦笙队展开技艺比拼，芦笙声响彻山谷，展示苗族音乐文化的精华，吸引大批游客和摄影爱好者慕名而来。",
+        activities: ["芦笙比赛", "歌舞汇演", "苗族手工艺展览", "民俗体验"],
+        icon: "🎶",
+      },
+    ],
+
+    miaoArts: [
+      {
+        id: 1,
+        name: "苗绣技艺",
+        artisan: "石美英",
+        age: 62,
+        level: "省级非遗传承人",
+        description:
+          "从事苗绣创作42年，精通数十种针法，作品曾参加全国非遗展览并获奖。",
+        image: "/images/avatar2.jpg",
+        videoTitle: "苗绣——针线间的史书",
+      },
+      {
+        id: 2,
+        name: "苗银锻造",
+        artisan: "龙德山",
+        age: 55,
+        level: "国家级非遗传承人",
+        description:
+          "家传银饰锻造技艺第五代传人，作品工艺精湛，远销全国各地及海外。",
+        image: "/images/avatar1.jpg",
+        videoTitle: "苗银银角——火与银的艺术",
+      },
+      {
+        id: 3,
+        name: "蜡染工艺",
+        artisan: "吴花香",
+        age: 48,
+        level: "县级非遗传承人",
+        description:
+          "蜡染图案设计富有创新，将传统纹样与现代审美结合，作品深受市场欢迎。",
+        image: "/images/avatar3.jpg",
+        videoTitle: "蜡染——蓝与白的诗意",
+      },
+    ],
+
+    // ============ 乡村旅游数据 ============
+    tourGuides: [
+      {
+        id: 1,
+        name: "吴乡导",
+        avatar: "/images/avatar1.jpg",
+        specialty: "苗寨深度游 · 农耕文化体验",
+        experience: "6",
+        rating: 4.9,
+        ratingCount: 156,
+        price: "180元/天",
+        intro:
+          "土生土长的苗族向导，熟悉苗寨文化和农耕风俗，可带领游客深度体验苗族原生态生活。",
+        tags: ["苗族文化", "农耕体验", "摸鱼捉虾", "苗家美食"],
+        available: true,
+      },
+      {
+        id: 2,
+        name: "石山妹",
+        avatar: "/images/avatar2.jpg",
+        specialty: "乡村美食 · 非遗技艺体验",
+        experience: "4",
+        rating: 4.8,
+        ratingCount: 88,
+        price: "150元/天",
+        intro:
+          "热情好客的苗族姑娘，擅长介绍当地美食文化和非遗技艺体验，讲解生动有趣，广受好评。",
+        tags: ["苗族美食", "非遗体验", "刺绣学习", "芦笙文化"],
+        available: true,
+      },
+      {
+        id: 3,
+        name: "龙大叔",
+        avatar: "/images/avatar3.jpg",
+        specialty: "山野探险 · 传统农事文化",
+        experience: "10",
+        rating: 5.0,
+        ratingCount: 234,
+        price: "200元/天",
+        intro:
+          "经验丰富的资深向导，对湘西山野地形了如指掌，带您走遍最美的苗寨秘境，体验最地道的农耕生活。",
+        tags: ["山野徒步", "溯溪探险", "野生植物", "传统农具"],
+        available: true,
+      },
+    ],
+
+    // ============ 特产商城数据 ============
+    products: [
+      {
+        id: 1,
+        name: "十八洞苗家腊肉",
+        price: 88,
+        unit: "500g",
+        category: "苗家美食",
+        image: "/images/harvester1.webp",
+        description:
+          "十八洞村传统腊肉，采用本地散养土猪，经苗家秘方腌制风干，香醇可口，是馈赠亲友的佳品。",
+        sales: 1289,
+        rating: 4.9,
+        tags: ["无添加", "土猪肉", "传统工艺"],
+      },
+      {
+        id: 2,
+        name: "苗家野生山花蜂蜜",
+        price: 128,
+        unit: "500ml",
+        category: "农产品",
+        image: "/images/apple.png",
+        description:
+          "采自苗岭深山的野生蜂蜜，花期丰富，蜜质醇厚，营养价值极高，纯天然无任何添加。",
+        sales: 856,
+        rating: 4.8,
+        tags: ["野生", "纯天然", "无勾兑"],
+      },
+      {
+        id: 3,
+        name: "苗乡有机红糯米",
+        price: 45,
+        unit: "2.5kg",
+        category: "粮食",
+        image: "/images/product-placeholder-3.svg",
+        description:
+          "苗族传统红糯米，梯田种植，无农药化肥，软糯香甜，是制作姊妹饭的传统食材，营养丰富。",
+        sales: 2134,
+        rating: 4.9,
+        tags: ["有机种植", "苗族特产", "梯田稻米"],
+      },
+      {
+        id: 4,
+        name: "苗绣手工香包",
+        price: 68,
+        unit: "个",
+        category: "手工艺品",
+        image: "/images/product-placeholder-4.svg",
+        description:
+          "苗族传承人全手工刺绣香包，图案精美，内填天然香草，香气宜人，是极佳的非遗伴手礼。",
+        sales: 634,
+        rating: 4.9,
+        tags: ["手工绣制", "非遗工艺", "伴手礼"],
+      },
+      {
+        id: 5,
+        name: "苗家高山干辣椒",
+        price: 38,
+        unit: "500g",
+        category: "农产品",
+        image: "/images/product-placeholder-5.svg",
+        description:
+          "苗岭海拔800米以上种植的本地辣椒，阳光自然晾晒，香辣浓郁，是苗家餐桌上不可缺少的调味佳品。",
+        sales: 1567,
+        rating: 4.7,
+        tags: ["高山种植", "天然晒干", "香辣浓郁"],
+      },
+      {
+        id: 6,
+        name: "手工苗银蝴蝶吊坠",
+        price: 198,
+        unit: "件",
+        category: "银饰",
+        image: "/images/product-placeholder-6.svg",
+        description:
+          "苗族银饰工艺传承人纯手工锻造，蝴蝶造型寓意吉祥，含苗族传统文化元素，做工精细，是收藏与馈赠的上品。",
+        sales: 389,
+        rating: 5.0,
+        tags: ["纯手工", "纯银材质", "非遗传承"],
+      },
+    ],
+  },
+});
