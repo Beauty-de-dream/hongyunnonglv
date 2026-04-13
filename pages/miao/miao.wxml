@@ -1,0 +1,166 @@
+<!-- pages/miao/miao.wxml - 苗乡风情页面 -->
+<view class="page-miao {{elderMode ? 'elder-mode' : ''}}">
+
+  <view class="read-aloud-btn" bindtap="onReadAloud" wx:if="{{elderMode}}">
+    <text class="read-icon">🔊</text>
+    <text class="read-label">朗读</text>
+  </view>
+
+  <view class="hero-banner">
+    <view class="hero-content">
+      <text class="hero-badge">🎋 苗乡风情</text>
+      <text class="hero-title">千年苗韵 · 风情无限</text>
+      <text class="hero-subtitle">感受苗族的文化魅力、非遗技艺与沉浸式体验</text>
+    </view>
+  </view>
+
+  <view class="quick-nav">
+    <view class="nav-item" bindtap="scrollToSection" data-id="culture">
+      <view class="nav-icon nav-purple">👘</view>
+      <text class="nav-text">文化科普</text>
+    </view>
+    <view class="nav-item" bindtap="scrollToSection" data-id="festivals">
+      <view class="nav-icon nav-pink">🎉</view>
+      <text class="nav-text">节庆活动</text>
+    </view>
+    <view class="nav-item" bindtap="scrollToSection" data-id="arts">
+      <view class="nav-icon nav-teal">🧵</view>
+      <text class="nav-text">非遗技艺</text>
+    </view>
+    <view class="nav-item" bindtap="scrollToSection" data-id="service">
+      <view class="nav-icon nav-green">🛍️</view>
+      <text class="nav-text">非遗服务</text>
+    </view>
+  </view>
+
+  <view class="section" id="culture">
+    <view class="section-header">
+      <view class="section-title-wrap">
+        <view class="title-bar title-bar-purple"></view>
+        <text class="section-title">文化科普</text>
+      </view>
+      <text class="section-subtitle">了解苗族独特的民族文化精髓</text>
+    </view>
+    <view class="culture-list">
+      <view class="culture-card" wx:for="{{cultures}}" wx:key="id" bindtap="showCultureDetail" data-index="{{index}}" style="background:{{item.bgColor}}">
+        <view class="culture-card-left">
+          <text class="culture-icon">{{item.icon}}</text>
+          <text class="culture-name" style="color:{{item.color}}">{{item.name}}</text>
+        </view>
+        <view class="culture-card-right">
+          <text class="culture-desc">{{item.description}}</text>
+          <view class="culture-features">
+            <text class="ctag" wx:for="{{item.features}}" wx:key="*this" wx:for-item="ft" style="color:{{item.color}}">{{ft}}</text>
+          </view>
+        </view>
+        <text class="culture-arrow" style="color:{{item.color}}">></text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section section-purple-light" id="festivals">
+    <view class="section-header">
+      <view class="section-title-wrap">
+        <view class="title-bar title-bar-purple"></view>
+        <text class="section-title">节庆活动预告</text>
+      </view>
+      <text class="section-subtitle">感受苗族最热闹的传统节日</text>
+    </view>
+    <view class="festival-list">
+      <view class="festival-card" wx:for="{{festivals}}" wx:key="id" bindtap="showFestivalDetail" data-index="{{index}}">
+        <view class="festival-top">
+          <text class="festival-icon">{{item.icon}}</text>
+          <view class="festival-title-wrap">
+            <text class="festival-name">{{item.name}}</text>
+            <text class="festival-location">📍 {{item.location}}</text>
+          </view>
+          <view class="festival-countdown {{item.daysLeft > 0 ? 'countdown-upcoming' : 'countdown-past'}}">
+            <text>{{item.daysLeft > 0 ? '还有' + item.daysLeft + '天' : '已举办'}}</text>
+          </view>
+        </view>
+        <text class="festival-date">📅 {{item.date}}</text>
+        <text class="festival-desc">{{item.description}}</text>
+        <view class="festival-activities">
+          <text class="activity-tag" wx:for="{{item.activities}}" wx:key="*this" wx:for-item="act">{{act}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section" id="arts">
+    <view class="section-header">
+      <view class="section-title-wrap">
+        <view class="title-bar title-bar-purple"></view>
+        <text class="section-title">非遗技艺展示</text>
+      </view>
+      <text class="section-subtitle">传承人亲授，探寻苗族技艺之美</text>
+    </view>
+    <view class="arts-list">
+      <view class="art-card" wx:for="{{miaoArts}}" wx:key="id" bindtap="watchArt" data-index="{{index}}">
+        <view class="art-img-wrap">
+          <image class="art-avatar" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="art-play-overlay">
+            <text class="play-icon">▶</text>
+          </view>
+        </view>
+        <view class="art-info">
+          <text class="art-name">{{item.name}}</text>
+          <view class="art-artisan-row">
+            <text class="artisan-name">{{item.artisan}}</text>
+            <text class="artisan-level">{{item.level}}</text>
+          </view>
+          <text class="artisan-age-text">{{item.age}}岁</text>
+          <text class="art-desc">{{item.description}}</text>
+          <view class="art-play-btn">
+            <text>▶ {{item.videoTitle}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section section-service" id="service">
+    <view class="section-header">
+      <view class="section-title-wrap">
+        <view class="title-bar title-bar-purple"></view>
+        <text class="section-title">非遗服务</text>
+      </view>
+      <text class="section-subtitle">从线上选购到线下体验，让苗族非遗走进更多人的生活</text>
+    </view>
+    <view class="service-list">
+      <view class="service-card" wx:for="{{serviceCards}}" wx:key="id">
+        <view class="service-top">
+          <view class="service-icon">{{item.icon}}</view>
+          <view class="service-title-wrap">
+            <text class="service-title">{{item.title}}</text>
+            <text class="service-stats">{{item.stats}}</text>
+          </view>
+        </view>
+        <text class="service-desc">{{item.desc}}</text>
+        <view class="service-tags">
+          <text class="service-tag" wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tag">{{tag}}</text>
+        </view>
+        <view class="service-btn" bindtap="handleServiceAction" data-action="{{item.action}}">
+          <text>{{item.actionText}} →</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="cta-section">
+    <text class="cta-title">🌿 深度体验苗乡风情</text>
+    <text class="cta-desc">既可以线上选购非遗文创，也可以预约课程，深度感受苗族文化魅力</text>
+    <view class="cta-actions">
+      <view class="cta-btn" bindtap="goToHeritageProducts">
+        <text>前往文创展销 →</text>
+      </view>
+      <view class="cta-btn cta-btn-light" bindtap="goToHeritageCourses">
+        <text>预约体验课程 →</text>
+      </view>
+      <view class="cta-link" bindtap="goToTourism">
+        <text>查看更多乡村旅游内容</text>
+      </view>
+    </view>
+  </view>
+
+</view>

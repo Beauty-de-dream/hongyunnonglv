@@ -1,0 +1,151 @@
+<!--pages/agriservice/agriservice.wxml - 农事服务页面-->
+<view class="page-agri {{elderMode ? 'elder-mode' : ''}}">
+
+  <!-- 朗读按钮（悬浮） -->
+  <view class="read-aloud-btn" bindtap="onReadAloud" wx:if="{{elderMode}}">
+    <text class="read-icon">🔊</text>
+    <text class="read-label">朗读</text>
+  </view>
+
+  <!-- 顶部横幅 -->
+  <view class="hero-banner">
+    <view class="hero-content">
+      <text class="hero-badge">🌾 农事服务</text>
+      <text class="hero-title">扎根沃土 · 服务农业</text>
+      <text class="hero-subtitle">农机共享 · 劳务招聘 · 助力农业生产</text>
+    </view>
+    <view class="hero-stats">
+      <view class="hstat-item">
+        <text class="hstat-num">{{stats.machineryCount}}+</text>
+        <text class="hstat-label">注册农机</text>
+      </view>
+      <view class="hstat-divider"></view>
+      <view class="hstat-item">
+        <text class="hstat-num">{{stats.workerCount}}+</text>
+        <text class="hstat-label">活跃务工</text>
+      </view>
+      <view class="hstat-divider"></view>
+      <view class="hstat-item">
+        <text class="hstat-num">{{stats.satisfaction}}%</text>
+        <text class="hstat-label">满意度</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 主要服务入口 -->
+  <view class="service-entries">
+    <view class="entry-card entry-green" bindtap="goToMachinery">
+      <view class="entry-icon-wrap entry-icon-green-bg">
+        <text class="entry-big-icon">🚜</text>
+      </view>
+      <view class="entry-content">
+        <text class="entry-title">农机共享</text>
+        <text class="entry-desc">盘活闲置农机，提高生产效率</text>
+        <view class="entry-tags">
+          <text class="etag etag-green">拖拉机</text>
+          <text class="etag etag-green">收割机</text>
+          <text class="etag etag-green">插秧机</text>
+        </view>
+      </view>
+      <text class="entry-arrow">›</text>
+    </view>
+    <view class="entry-card entry-orange" bindtap="goToJobs">
+      <view class="entry-icon-wrap entry-icon-orange-bg">
+        <text class="entry-big-icon">👥</text>
+      </view>
+      <view class="entry-content">
+        <text class="entry-title">助农务工</text>
+        <text class="entry-desc">"夕阳红"助农计划，灵活就业</text>
+        <view class="entry-tags">
+          <text class="etag etag-orange">插秧收割</text>
+          <text class="etag etag-orange">果园管理</text>
+        </view>
+      </view>
+      <text class="entry-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 辅助服务 -->
+  <view class="other-services">
+    <view class="other-item" bindtap="goToInsurance">
+      <text class="other-icon">🛡️</text>
+      <text class="other-text">农业保险</text>
+    </view>
+    <view class="other-item" bindtap="goToContract">
+      <text class="other-icon">📋</text>
+      <text class="other-text">劳务合同</text>
+    </view>
+    <view class="other-item" bindtap="goToDispute">
+      <text class="other-icon">⚖️</text>
+      <text class="other-text">纠纷调解</text>
+    </view>
+    <view class="other-item" bindtap="goToEmergency">
+      <text class="other-icon">🆘</text>
+      <text class="other-text">紧急求助</text>
+    </view>
+  </view>
+
+  <!-- 精选农机 -->
+  <view class="section">
+    <view class="section-header-row">
+      <view class="section-title-wrap">
+        <view class="title-bar title-bar-green"></view>
+        <text class="section-title">精选农机</text>
+      </view>
+      <text class="see-more" bindtap="goToMachinery">查看全部 ›</text>
+    </view>
+    <scroll-view scroll-x class="horizontal-scroll">
+      <view class="scroll-item" wx:for="{{featuredMachinery}}" wx:key="id" bindtap="goToMachineryDetail" data-id="{{item.id}}">
+        <view class="mini-card">
+          <image class="mini-card-image" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="mini-status-badge {{item.available ? 'status-green' : 'status-red'}}">
+            {{item.available ? '可租' : '已出'}}
+          </view>
+          <view class="mini-card-body">
+            <text class="mini-name">{{item.name}}</text>
+            <text class="mini-price">¥{{item.price}}<text class="mini-unit">/天</text></text>
+            <text class="mini-location">📍 {{item.location}}</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 最新岗位 -->
+  <view class="section section-gray">
+    <view class="section-header-row">
+      <view class="section-title-wrap">
+        <view class="title-bar title-bar-orange"></view>
+        <text class="section-title">最新岗位</text>
+      </view>
+      <text class="see-more" bindtap="goToJobs">查看全部 ›</text>
+    </view>
+    <view class="job-list">
+      <view class="mini-job-card" wx:for="{{featuredJobs}}" wx:key="id" bindtap="goToJobDetail" data-id="{{item.id}}">
+        <view class="job-title-row">
+          <text class="job-name">{{item.title}}</text>
+          <text class="job-salary-badge">{{item.salary}}</text>
+        </view>
+        <text class="job-desc-text">{{item.description}}</text>
+        <view class="job-meta-row">
+          <text class="job-meta-text">📍 {{item.location}}</text>
+          <text class="job-meta-text">⏰ {{item.duration}}</text>
+        </view>
+        <view class="apply-btn" catchtap="applyJob" data-id="{{item.id}}">立即申请</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 发布浮动按钮区 -->
+  <view class="fab-area">
+    <view class="fab-item fab-green" bindtap="publishMachinery">
+      <text class="fab-icon-text">🚜</text>
+      <text class="fab-label">发布农机</text>
+    </view>
+    <view class="fab-item fab-orange" bindtap="publishJob">
+      <text class="fab-icon-text">💼</text>
+      <text class="fab-label">发布招聘</text>
+    </view>
+  </view>
+
+</view>
