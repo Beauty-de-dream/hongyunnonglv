@@ -1,0 +1,81 @@
+/**
+ * 农机数据
+ * 包含平台上的农机租赁信息
+ */
+
+const machineryData = [
+  {
+    id: 1,
+    name: "东风拖拉机DX1204",
+    type: "拖拉机",
+    price: 300,
+    location: "河南省郑州市",
+    owner: "张师傅",
+    available: true,
+    image: "/images/tractor1.webp",
+    description: "120马力，适合中型农田作业",
+    phone: "13800138001",
+  },
+  {
+    id: 2,
+    name: "雷沃谷神收割机",
+    type: "收割机",
+    price: 500,
+    location: "山东省潍坊市",
+    owner: "李师傅",
+    available: true,
+    image: "/images/harvester1.webp",
+    description: "效率高，适合水稻、小麦收割",
+    phone: "13800138002",
+  },
+  {
+    id: 3,
+    name: "久保田插秧机",
+    type: "插秧机",
+    price: 200,
+    location: "湖南省长沙市",
+    owner: "王师傅",
+    available: true,
+    image: "/images/planter.webp",
+    description: "自动化程度高，提高插秧效率",
+    phone: "13800138003",
+  },
+  {
+    id: 4,
+    name: "约翰迪尔播种机",
+    type: "播种机",
+    price: 250,
+    location: "湖北省武汉市",
+    owner: "赵师傅",
+    available: true,
+    image: "/images/seeder.webp",
+    description: "精密播种，节省种子，提高出苗率",
+    phone: "13800138004",
+  },
+  {
+    id: 5,
+    name: "沃得锐龙收割机",
+    type: "收割机",
+    price: 450,
+    location: "河南省洛阳市",
+    owner: "孙师傅",
+    available: false,
+    image: "/images/harvester2.jpg",
+    description: "大型联合收割机，日作业面积可达100亩",
+    phone: "13800138005",
+  },
+  {
+    id: 6,
+    name: "中联重科拖拉机",
+    type: "拖拉机",
+    price: 350,
+    location: "山东省济南市",
+    owner: "周师傅",
+    available: true,
+    image: "/images/tractor2.png",
+    description: "180马力大型拖拉机，适合大面积农田",
+    phone: "13800138006",
+  },
+];
+
+module.exports = machineryData;

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360">
+  <defs>
+    <linearGradient id="bg5" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff0f3"/>
+      <stop offset="100%" stop-color="#ffd0da"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="360" fill="url(#bg5)"/>
+  <circle cx="140" cy="266" r="86" fill="#ff8aa2" opacity="0.22"/>
+  <circle cx="460" cy="98" r="54" fill="#ff6d8d" opacity="0.18"/>
+  <rect x="88" y="104" width="424" height="152" rx="28" fill="#ffffff" opacity="0.8"/>
+  <text x="300" y="175" text-anchor="middle" font-size="34" font-family="Arial, sans-serif" fill="#d94970" font-weight="700">PRODUCT 05</text>
+  <text x="300" y="218" text-anchor="middle" font-size="18" font-family="Arial, sans-serif" fill="#ea698b">PLACEHOLDER</text>
+</svg>
