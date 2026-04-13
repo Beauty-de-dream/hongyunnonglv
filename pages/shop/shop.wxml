@@ -1,0 +1,72 @@
+<!--pages/shop/shop.wxml - 苗家特产商城-->
+<view class="page-shop {{elderMode ? 'elder-mode' : ''}}">
+
+  <!-- 页面头部 -->
+  <view class="page-header">
+    <text class="page-header-title">🛍️ 苗家特产商城</text>
+    <text class="page-header-desc">地道苗家好物，产地直供品质保证</text>
+  </view>
+
+  <!-- 品质承诺 -->
+  <view class="guarantee-bar hide-in-elder">
+    <view class="g-item">
+      <text class="g-icon">🌱</text>
+      <text class="g-text">产地直供</text>
+    </view>
+    <view class="g-item">
+      <text class="g-icon">✅</text>
+      <text class="g-text">品质保证</text>
+    </view>
+    <view class="g-item">
+      <text class="g-icon">🚚</text>
+      <text class="g-text">顺丰包邮</text>
+    </view>
+    <view class="g-item">
+      <text class="g-icon">🔄</text>
+      <text class="g-text">7天退换</text>
+    </view>
+  </view>
+
+  <!-- 分类导航 -->
+  <scroll-view scroll-x class="category-bar">
+    <view class="cat-item {{selectedCat === '' ? 'cat-active' : ''}}" bindtap="filterCat" data-cat="">全部</view>
+    <view class="cat-item {{selectedCat === '苗家美食' ? 'cat-active' : ''}}" bindtap="filterCat" data-cat="苗家美食">苗家美食</view>
+    <view class="cat-item {{selectedCat === '农产品' ? 'cat-active' : ''}}" bindtap="filterCat" data-cat="农产品">农产品</view>
+    <view class="cat-item {{selectedCat === '手工艺品' ? 'cat-active' : ''}}" bindtap="filterCat" data-cat="手工艺品">手工艺品</view>
+    <view class="cat-item {{selectedCat === '银饰' ? 'cat-active' : ''}}" bindtap="filterCat" data-cat="银饰">苗族银饰</view>
+    <view class="cat-item {{selectedCat === '粮食' ? 'cat-active' : ''}}" bindtap="filterCat" data-cat="粮食">粮食</view>
+  </scroll-view>
+
+  <!-- 商品列表 -->
+  <view class="product-grid">
+    <view class="product-card" wx:for="{{filteredProducts}}" wx:key="id" bindtap="goToDetail" data-index="{{index}}">
+      <image class="product-img" src="{{item.image}}" mode="aspectFill"></image>
+      <view class="product-cat-badge">{{item.category}}</view>
+      <view class="product-body">
+        <text class="product-name">{{item.name}}</text>
+        <text class="product-desc">{{item.description}}</text>
+        <view class="product-tags">
+          <text class="ptag" wx:for="{{item.tags}}" wx:key="*this" wx:for-item="ptag">{{ptag}}</text>
+        </view>
+        <view class="product-rating-row">
+          <text class="product-rating">⭐ {{item.rating}}</text>
+          <text class="product-sales">已售{{item.sales}}件</text>
+        </view>
+        <view class="product-buy-row">
+          <view class="price-wrap">
+            <text class="product-price">¥{{item.price}}</text>
+            <text class="product-unit">/{{item.unit}}</text>
+          </view>
+          <view class="buy-btn" catchtap="buyProduct" data-index="{{index}}">立即购买</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{filteredProducts.length === 0}}">
+    <text style="font-size:80rpx;">🛒</text>
+    <text class="empty-text">该分类暂无商品</text>
+  </view>
+
+</view>

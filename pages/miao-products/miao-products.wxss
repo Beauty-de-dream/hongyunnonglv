@@ -1,0 +1,261 @@
+.page-products {
+  min-height: 100vh;
+  background: #f6f2f9;
+  padding-bottom: 32rpx;
+}
+
+.hero-banner {
+  position: relative;
+  height: 340rpx;
+  background: linear-gradient(135deg, #4A148C 0%, #7B1FA2 48%, #C2185B 100%);
+  overflow: hidden;
+  padding: 48rpx 34rpx;
+  display: flex;
+  align-items: flex-end;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: -80rpx;
+  right: -30rpx;
+  width: 280rpx;
+  height: 280rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.hero-badge {
+  width: fit-content;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 22rpx;
+}
+
+.hero-title {
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.hero-subtitle {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.7;
+}
+
+.promise-bar {
+  margin: -24rpx 24rpx 18rpx;
+  background: #fff;
+  border-radius: 22rpx;
+  padding: 20rpx 12rpx;
+  display: flex;
+  box-shadow: 0 12rpx 24rpx rgba(74, 20, 140, 0.08);
+  position: relative;
+  z-index: 2;
+}
+
+.promise-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.promise-icon {
+  font-size: 34rpx;
+}
+
+.promise-text {
+  font-size: 22rpx;
+  color: #5d4a67;
+}
+
+.category-bar {
+  white-space: nowrap;
+  padding: 0 24rpx 10rpx;
+}
+
+.category-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14rpx 28rpx;
+  margin-right: 16rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  background: #fff;
+  color: #6b5a73;
+  border: 2rpx solid #eadcf1;
+}
+
+.category-item-active {
+  color: #fff;
+  background: linear-gradient(135deg, #7B1FA2, #AD1457);
+  border-color: transparent;
+}
+
+.intro-card,
+.bottom-card {
+  margin: 0 24rpx 18rpx;
+  background: #fff;
+  border-radius: 22rpx;
+  padding: 28rpx;
+  box-shadow: 0 8rpx 18rpx rgba(74, 20, 140, 0.06);
+}
+
+.intro-title,
+.bottom-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #41204f;
+  margin-bottom: 12rpx;
+}
+
+.intro-desc,
+.bottom-desc {
+  display: block;
+  font-size: 25rpx;
+  color: #695a72;
+  line-height: 1.8;
+}
+
+.product-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+  padding: 0 24rpx;
+}
+
+.product-card {
+  background: #fff;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 10rpx 22rpx rgba(74, 20, 140, 0.08);
+}
+
+.product-image {
+  width: 100%;
+  height: 260rpx;
+  background: #f1ebf5;
+}
+
+.product-body {
+  padding: 24rpx;
+}
+
+.product-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 14rpx;
+}
+
+.product-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #341442;
+}
+
+.product-category {
+  flex-shrink: 0;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  color: #7B1FA2;
+  background: #f1e4f8;
+}
+
+.product-desc {
+  display: block;
+  font-size: 25rpx;
+  color: #67586f;
+  line-height: 1.8;
+  margin-bottom: 14rpx;
+}
+
+.product-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  margin-bottom: 14rpx;
+}
+
+.meta-text {
+  font-size: 23rpx;
+  color: #836f8b;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-bottom: 20rpx;
+}
+
+.tag {
+  font-size: 22rpx;
+  color: #8E24AA;
+  background: #f7ebfb;
+  border-radius: 999rpx;
+  padding: 8rpx 16rpx;
+}
+
+.product-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.product-price {
+  font-size: 36rpx;
+  color: #AD1457;
+  font-weight: bold;
+}
+
+.product-unit,
+.product-sales {
+  font-size: 22rpx;
+  color: #8a7a92;
+}
+
+.buy-btn,
+.bottom-btn {
+  padding: 16rpx 26rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  color: #fff;
+  background: linear-gradient(135deg, #7B1FA2, #AD1457);
+}
+
+.empty-state {
+  padding: 80rpx 24rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.empty-icon {
+  font-size: 72rpx;
+}
+
+.empty-text {
+  font-size: 26rpx;
+  color: #8a7a92;
+}

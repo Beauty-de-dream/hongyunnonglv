@@ -1,0 +1,88 @@
+<view class="page-courses {{elderMode ? 'elder-mode' : ''}}">
+  <view class="hero-banner">
+    <view class="hero-shape hero-shape-one"></view>
+    <view class="hero-shape hero-shape-two"></view>
+    <view class="hero-content">
+      <text class="hero-badge">苗乡风情 · 子页面</text>
+      <text class="hero-title">非遗体验课程</text>
+      <text class="hero-subtitle">预约苗绣、银饰、蜡染等非遗体验课程，沉浸式感受苗乡技艺</text>
+    </view>
+  </view>
+
+  <view class="stats-panel">
+    <view class="stat-item">
+      <text class="stat-num">3</text>
+      <text class="stat-label">技艺方向</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-num">6+</text>
+      <text class="stat-label">体验课程</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-num">小班制</text>
+      <text class="stat-label">预约授课</text>
+    </view>
+  </view>
+
+  <scroll-view scroll-x class="category-bar">
+    <view
+      class="category-chip {{selectedCategory === item ? 'category-chip-active' : ''}}"
+      wx:for="{{categories}}"
+      wx:key="*this"
+      data-category="{{item}}"
+      bindtap="filterCategory"
+    >
+      {{item}}
+    </view>
+  </scroll-view>
+
+  <view class="tips-card">
+    <text class="tips-title">课程亮点</text>
+    <text class="tips-desc">由本地传承人或工坊老师授课，支持游客体验、亲子互动、团队研学，部分课程成品可直接带走。</text>
+  </view>
+
+  <view class="course-list">
+    <view class="course-card" wx:for="{{filteredCourses}}" wx:key="id">
+      <image class="course-image" src="{{item.image}}" mode="aspectFill"></image>
+      <view class="course-body">
+        <view class="course-header">
+          <view>
+            <text class="course-name">{{item.name}}</text>
+            <text class="course-instructor">讲师：{{item.instructor}}</text>
+          </view>
+          <view class="course-category">{{item.category}}</view>
+        </view>
+
+        <view class="info-grid">
+          <text class="info-text">时长：{{item.duration}}</text>
+          <text class="info-text">费用：¥{{item.price}}</text>
+          <text class="info-text">时间：{{item.schedule}}</text>
+          <text class="info-text">余位：{{item.seats}} 人</text>
+        </view>
+
+        <text class="course-location">地点：{{item.location}}</text>
+        <text class="course-desc">{{item.description}}</text>
+
+        <view class="tag-row">
+          <text class="tag" wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tag">{{tag}}</text>
+        </view>
+
+        <view class="course-actions">
+          <view class="ghost-btn" bindtap="showCourseDetail" data-index="{{index}}">查看详情</view>
+          <view class="solid-btn" bindtap="bookCourse" data-index="{{index}}">立即预约</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{filteredCourses.length === 0}}">
+    <text class="empty-icon">🗓️</text>
+    <text class="empty-text">当前分类暂无课程</text>
+  </view>
+
+  <view class="footer-card">
+    <text class="footer-title">想先看看有哪些非遗文创在售？</text>
+    <text class="footer-desc">体验完成后，也可以把喜欢的苗绣、银饰、蜡染作品带回家。</text>
+    <view class="footer-btn" bindtap="goToProducts">前往文创展销 →</view>
+  </view>
+</view>
